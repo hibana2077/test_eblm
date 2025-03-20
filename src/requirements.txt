@@ -1,3 +1,4 @@
 transformers
 datasets
 huggingface_hub[cli]
+nvitop

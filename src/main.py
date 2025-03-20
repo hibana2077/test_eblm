@@ -16,7 +16,9 @@ class TextDataset(Dataset):
     def __init__(self, dataset, e5_tokenizer, lm_tokenizer, max_length=512):
         self.dataset = dataset
         self.e5_tokenizer = e5_tokenizer
+        self.e5_tokenizer.pad_token = self.e5_tokenizer.eos_token
         self.lm_tokenizer = lm_tokenizer
+        self.lm_tokenizer.pad_token = self.lm_tokenizer.eos_token
         self.max_length = max_length
         
     def __len__(self):
@@ -58,7 +60,8 @@ def train(args):
     
     # Load dataset
     logger.info(f"Loading dataset: {args.dataset_name}")
-    dataset = load_dataset(args.dataset_name, split="train[:10%]")  # Using a small portion for MVP
+    # dataset = load_dataset(args.dataset_name, split="train[:10%]")  # Using a small portion for MVP
+    dataset = load_dataset(args.dataset_name, args.dataset_config_name, split="train[:10%]")  # Using a small portion for MVP
     
     # Create dataset and dataloader
     train_dataset = TextDataset(
@@ -130,7 +133,7 @@ def train(args):
             lr_scheduler.step()
             
             # Update progress bar
-            progress_bar.set_postfix({"loss": loss.item()})
+            progress_bar.set_postfix({"loss": total_loss / (progress_bar.n + 1)})
         
         avg_loss = total_loss / len(train_dataloader)
         logger.info(f"Epoch {epoch + 1}: Average loss = {avg_loss:.4f}")
@@ -160,6 +163,8 @@ def main():
     # Training arguments
     parser.add_argument("--dataset_name", type=str, default="wikitext", 
                         help="Dataset to use for training")
+    parser.add_argument("--dataset_config_name", type=str, default="wikitext-2-raw-v1",
+                        help="Dataset configuration name")
     parser.add_argument("--output_dir", type=str, default="./e5-smollm-model", 
                         help="Directory to save the model")
     parser.add_argument("--max_length", type=int, default=512, 

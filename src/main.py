@@ -49,8 +49,8 @@ class TextDataset(Dataset):
         return {
             'e5_input_ids': e5_encodings.input_ids.flatten(),
             'e5_attention_mask': e5_encodings.attention_mask.flatten(),
-            'labels': lm_encodings.input_ids.flatten()
-            # 'labels': e5_encodings.input_ids.flatten()
+            # 'labels': lm_encodings.input_ids.flatten()
+            'labels': e5_encodings.input_ids.flatten()
         }
 
 

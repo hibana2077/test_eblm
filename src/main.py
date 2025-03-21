@@ -50,6 +50,7 @@ class TextDataset(Dataset):
             'e5_input_ids': e5_encodings.input_ids.flatten(),
             'e5_attention_mask': e5_encodings.attention_mask.flatten(),
             'labels': lm_encodings.input_ids.flatten()
+            # 'labels': e5_encodings.input_ids.flatten()
         }
 
 
@@ -60,8 +61,10 @@ def train(args):
     
     # Load dataset
     logger.info(f"Loading dataset: {args.dataset_name}")
-    # dataset = load_dataset(args.dataset_name, split="train[:10%]")  # Using a small portion for MVP
-    dataset = load_dataset(args.dataset_name, args.dataset_config_name, split="train[:10%]")  # Using a small portion for MVP
+    if args.dataset_config_name:
+        dataset = load_dataset(args.dataset_name, args.dataset_config_name, split="train[:10%]")
+    else:
+        dataset = load_dataset(args.dataset_name, split="train[:10%]")
     
     # Create dataset and dataloader
     train_dataset = TextDataset(
@@ -105,7 +108,7 @@ def train(args):
             e5_input_ids = batch['e5_input_ids'].to(args.device)
             e5_attention_mask = batch['e5_attention_mask'].to(args.device)
             labels = batch['labels'].to(args.device)
-            
+
             # Zero the gradients
             optimizer.zero_grad()
             
@@ -115,7 +118,6 @@ def train(args):
                 attention_mask=e5_attention_mask,
                 labels=labels
             )
-            
             loss = outputs.loss
             total_loss += loss.item()
             
@@ -163,7 +165,7 @@ def main():
     # Training arguments
     parser.add_argument("--dataset_name", type=str, default="wikitext", 
                         help="Dataset to use for training")
-    parser.add_argument("--dataset_config_name", type=str, default="wikitext-2-raw-v1",
+    parser.add_argument("--dataset_config_name", type=str, default="",
                         help="Dataset configuration name")
     parser.add_argument("--output_dir", type=str, default="./e5-smollm-model", 
                         help="Directory to save the model")

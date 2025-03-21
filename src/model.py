@@ -41,6 +41,11 @@ class E5SmolLMModel(nn.Module):
         # Remove and replace the embedding layer from SmolLM2
         self.original_word_embeddings = self.lm_model.get_input_embeddings()
         
+        # Resize the token embeddings to match E5 tokenizer size
+        # self.lm_model.resize_token_embeddings(self.e5_tokenizer.vocab_size) # recommended
+        # self.lm_model.lm_head.out_features = self.e5_tokenizer.vocab_size
+
+
     def forward(self, input_ids, attention_mask, labels=None):
         # Get E5 embeddings
         e5_outputs = self.e5_model(
@@ -48,7 +53,7 @@ class E5SmolLMModel(nn.Module):
             attention_mask=attention_mask, 
             return_dict=True
         )
-        
+        print(f"E5 outputs: {e5_outputs.last_hidden_state.shape}")
         # Use the last hidden state as embeddings
         embeddings = e5_outputs.last_hidden_state
         

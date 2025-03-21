@@ -62,10 +62,12 @@ def train(args):
     # Load dataset
     logger.info(f"Loading dataset: {args.dataset_name}")
     if args.dataset_config_name:
-        dataset = load_dataset(args.dataset_name, args.dataset_config_name, split="train[:10%]")
+        dataset = load_dataset(args.dataset_name, args.dataset_config_name, split="train") #[:10%]
     else:
-        dataset = load_dataset(args.dataset_name, split="train[:10%]")
+        dataset = load_dataset(args.dataset_name, split="train") #[:10%]
     
+    logger.info(f"Dataset size: {len(dataset)}")
+
     # Create dataset and dataloader
     train_dataset = TextDataset(
         dataset, 
